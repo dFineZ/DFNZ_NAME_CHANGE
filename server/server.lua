@@ -46,7 +46,7 @@ AddEventHandler('DFNZ_NAME_CHANGE:change_lastname', function(lastname)
 
     if PlayerMoney >= Price then
 
-        sendToDiscord(color, title, '**OLD NAME: **'..xPlayer.getName..'\n**ID:** '..xPlayer.source..'\n**IDENTIFIER:** '..xPlayer.getIdentifier()..'\n**NEW LASTNAME:** '..firstname, footer)
+        sendToDiscord(color, title, '**OLD NAME: **'..xPlayer.getName..'\n**ID:** '..xPlayer.source..'\n**IDENTIFIER:** '..xPlayer.getIdentifier()..'\n**NEW LASTNAME:** '..lastname, footer)
 
         MySQL.Async.execute('UPDATE users SET lastname = @lastname WHERE identifier = @identifier', {
             ['@lastname'] = lastname,
