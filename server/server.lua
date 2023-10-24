@@ -1,10 +1,10 @@
-local xPlayer = ESX.GetPlayerFromId()
+lib.locale()
 
 function sendToDiscord(color, name, message, footer)
     local embed = {
           {
               ["color"] = Config.WebhookColor,
-              ["title"] = "**"..Config.Text["webhook_title"].."**",
+              ["title"] = "**NAME CHANGE)**",
               ["description"] = message,
               ["footer"] = {
                   ["text"] = "NAMECHANGER SCRIPT by DFNZ",
@@ -19,7 +19,7 @@ end
 RegisterServerEvent('DFNZ_NAME_CHANGE:change_firstname')
 AddEventHandler('DFNZ_NAME_CHANGE:change_firstname', function(firstname) 
     local xPlayer = ESX.GetPlayerFromId(source)
-    local Price = Config.firstnamePrice
+    local Price = Config.ChangeFirstNamePrice
     local PlayerMoney = xPlayer.getMoney()
 
     if PlayerMoney >= Price then
@@ -30,36 +30,68 @@ AddEventHandler('DFNZ_NAME_CHANGE:change_firstname', function(firstname)
             ['@firstname'] = firstname,
             ['@identifier'] = xPlayer.identifier
         })
-        TriggerClientEvent('esx:showNotification', source, Config.Text["new_firstname"]..firstname)
-        TriggerClientEvent('esx:showNotification', source, Config.Text["reconnect_message"])
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = locale("notify_title"), 
+            description = locale("new_firstname")..firstname, 
+            type = 'success',
+            position = Config.NotifyPosition,
+            duration = Config.NotifyDuration
+        })
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = locale("notify_title"), 
+            description = locale("reconnect_message"), 
+            type = 'info',
+            position = Config.NotifyPosition,
+            duration = Config.NotifyDuration
+        })
         xPlayer.removeMoney(Price)
     else
-        TriggerClientEvent('esx:showNotification', source, Config.Text["not_enough_money"])
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = locale("notify_title"), 
+            description = locale("not_enough_money"), 
+            type = 'error',
+            position = Config.NotifyPosition,
+            duration = Config.NotifyDuration
+        })
     end
 end)
 
 RegisterServerEvent('DFNZ_NAME_CHANGE:change_lastname')
 AddEventHandler('DFNZ_NAME_CHANGE:change_lastname', function(lastname) 
     local xPlayer = ESX.GetPlayerFromId(source)
-    local Price = Config.lastnamePrice
+    local Price = Config.ChangeLastNamePrice
     local PlayerMoney = xPlayer.getMoney()
 
     if PlayerMoney >= Price then
 
-        sendToDiscord(color, title, '**OLD NAME: **'..xPlayer.getName..'\n**ID:** '..xPlayer.source..'\n**IDENTIFIER:** '..xPlayer.getIdentifier()..'\n**NEW LASTNAME:** '..lastname, footer)
+        sendToDiscord(color, title, '**OLD NAME: **'..xPlayer.name..'\n**ID:** '..xPlayer.source..'\n**IDENTIFIER:** '..xPlayer.getIdentifier()..'\n**NEW LASTNAME:** '..lastname, footer)
 
         MySQL.Async.execute('UPDATE users SET lastname = @lastname WHERE identifier = @identifier', {
             ['@lastname'] = lastname,
             ['@identifier'] = xPlayer.identifier
         })
-        TriggerClientEvent('esx:showNotification', source, Config.Text["new_lastname"]..lastname)
-        TriggerClientEvent('esx:showNotification', source, Config.Text["reconnect_message"])
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = locale("notify_title"), 
+            description = locale("new_lastname")..lastname, 
+            type = 'success',
+            position = Config.NotifyPosition,
+            duration = Config.NotifyDuration
+        })
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = locale("notify_title"), 
+            description = locale("reconnect_message"), 
+            type = 'info',
+            position = Config.NotifyPosition,
+            duration = Config.NotifyDuration
+        })
         xPlayer.removeMoney(Price)
     else
-        TriggerClientEvent('esx:showNotification', source, Config.Text["not_enough_money"])
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = locale("notify_title"), 
+            description = locale("not_enough_money"), 
+            type = 'error',
+            position = Config.NotifyPosition,
+            duration = Config.NotifyDuration
+        })
     end
-end)
-
-AddEventHandler('onResourceStart', function()
-    print('Thanks for using one of my Scripts. Greeting DFNZ :)')
 end)
