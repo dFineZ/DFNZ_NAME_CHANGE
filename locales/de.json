@@ -1,0 +1,13 @@
+{
+   "change_firstname": "Vornamen ändern",
+   "change_lastname": "Nachnamen ändern",
+   "price": "Preis",
+   "currency": "$",
+   "enter_name": "Gebe hier den Namen ein",
+   "notify_title": "Richter",
+   "no_input": "Es wurde keine Eingabe getätigt",
+   "new_firstname": "Dein neuer Vorname lautet: ",
+   "new_lastname": "Dein neuer Nachname lautet: ",
+   "not_enough_money": "Du hast nicht genug Bargeld dabei",
+   "reconnect_message": "Um deine Änderung zu speichern, musst du dich einmal neu verbinden"
+}

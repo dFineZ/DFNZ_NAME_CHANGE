@@ -1,0 +1,13 @@
+{
+    "change_firstname": "Change firstname",
+    "change_lastname": "Change lastname",
+    "price": "Price",
+    "currency": "$",
+    "enter_name": "Enter your new name here",
+    "notify_title": "Judge",
+    "no_input": "There was no input",
+    "new_firstname": "Your new firstname is: ",
+    "new_lastname": "Your new lastname is: ",
+    "not_enough_money": "You don#t have enough money",
+    "reconnect_message": "Please reconnect the server to safe your name"
+}
