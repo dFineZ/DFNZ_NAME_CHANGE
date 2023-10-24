@@ -1,145 +1,82 @@
-local pos = {x = 1135.8882, y = -784.9349, z = 57.5987, rot = 319.8426}
-local isNearPed = false
-local isAtPed = false
-local isPedLoaded = false
-local pedModel = GetHashKey("cs_barry")
-local npc
+lib.locale()
 
 Citizen.CreateThread(function()
 
-    while true do
-    
-        local playerPed = PlayerPedId()
-        local playerCoords = GetEntityCoords(playerPed)
+    if Config.EnableBlip then
+        blip = AddBlipForCoord(Config.Location.x, Config.Location.y, Config.Location.z)
+        SetBlipDisplay(blip, 4)
+        SetBlipSprite(blip, Config.Blip.sprite)
+        SetBlipColour(blip, Config.Blip.colour)
+        SetBlipScale(blip, Config.Blip.size)
+        SetBlipAsShortRange(blip, true)
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString(Config.Blip.name)
+        EndTextCommandSetBlipName(blip)
+    end  
 
-        local distance = Vdist(playerCoords, pos.x, pos.y, pos.z)
-        isNearPed = false
-        isAtPed = false
-
-        if distance < 25 then
-            isNearPed = true
-            if not isPedLoaded then
-                RequestModel(pedModel)
-                while not HasModelLoaded(pedModel) do
-                    Wait(10)
-                end
-
-                npc = CreatePed(4, pedModel, pos.x, pos.y, pos.z - 1.0, pos.rot, false, false)
-                FreezeEntityPosition(npc, true)
-                SetEntityHeading(npc, pos.rot)
-                SetEntityInvincible(npc, true)
-                SetBlockingOfNonTemporaryEvents(npc, true)
-
-                isPedLoaded = true
-            end
+    if Config.EnablePed then
+        RequestModel(Config.Location.model)
+        while not HasModelLoaded(Config.Location.model) do
+            Wait(10)
         end
 
-        if isPedLoaded and not isNearPed then
-            DeleteEntity(npc)
-            SetModelAsNoLongerNeeded(pedModel)
-            isPedLoaded = false        
-        end
-
-        if distance < 2.0 then
-            isAtPed = true
-        end
-        Citizen.Wait(500)
+        npc = CreatePed(4, Config.Location.model, Config.Location.x, Config.Location.y, Config.Location.z - 1.0, Config.Location.rot, false, false)
+        FreezeEntityPosition(npc, true)
+        SetEntityHeading(npc, Config.Location.rot)
+        SetEntityInvincible(npc, true)
+        SetBlockingOfNonTemporaryEvents(npc, true)
     end
 
-end)
-
-Citizen.CreateThread(function()
-
-    while true do
-        if isAtPed then
-            ESX.ShowFloatingHelpNotification(Config.Text["floatingtext"], vector3(pos.x, pos.y, pos.z + 0.85))
-
-            lib.showTextUI(Config.Text["textui"], {
-                position = 'right-center',
-                icon = 'user',
-                iconColor = '#FF6000'
-            })
-
-            if IsControlJustReleased(0, 38) then
-                TriggerEvent('DFNZ_NAME_CHANGE:main_menu')
-                lib.hideTextUI()
-            end
-        end
-
-        if not isAtPed then
-            lib.hideTextUI()
-        end
-        Citizen.Wait(1)
-    end
-end)
-
-RegisterNetEvent('DFNZ_NAME_CHANGE:main_menu', function()
-
-    lib.registerContext({
-        id = 'name_change_menu',
-        title = Config.Text["namechange"],
+    exports.ox_target:addSphereZone({
+        coords = vec3(Config.Location.x, Config.Location.y, Config.Location.z),
+        radius = 1.0,
+        debug = false,
+        drawSprite = Config.Location.drawSprite,
         options = {
             {
-                title = Config.Text["firstname_change"],
-                description = Config.Text["fistname_change_desc"]..' '..Config.firstnamePrice..'$',
-                icon = 'user',
-                iconColor = '#FF6000',
-                event = 'DFNZ_NAME_CHANGE:firstname_input',
+                label = locale("change_firstname")..': '..locale("price")..' '..Config.ChangeFirstNamePrice..locale("currency"),
+                icon = 'fa-regular fa-hand',
+                iconColor = Config.IconColor,
+                onSelect = function()
+                    local input = lib.inputDialog(locale("change_firstname"), {
+                        {type = 'input', description = locale("enter_name"), placeholder = 'Lebron'}
+                    })
+                    if input == nil then
+                        lib.notify({
+                            title = locale("notify_title"),
+                            description = locale("no_input"),
+                            duration = Config.NotifyDuration,
+                            position = Config.NotifyPosition,
+                            type = 'error',
+                        })
+                    else
+                        local firstname = input[1]
+                        TriggerServerEvent('DFNZ_NAME_CHANGE:change_firstname', firstname)
+                    end
+                end
             },
             {
-                title = Config.Text["lastname_change"],
-                description = Config.Text["lastname_change_desc"]..' '..Config.lastnamePrice..'$',
-                icon = 'user',
-                iconColor = '#FF6000',
-                event = 'DFNZ_NAME_CHANGE:lastname_input',
+                label = locale("change_lastname")..': '..locale("price")..' '..Config.ChangeLastNamePrice..locale("currency"),
+                icon = 'fa-regular fa-hand',
+                iconColor = Config.IconColor,
+                onSelect = function()
+                    local input = lib.inputDialog(locale("change_lastname"), {
+                        {type = 'input', description = locale("enter_name"), placeholder = 'James'}
+                    })
+                    if input == nil then
+                        lib.notify({
+                            title = locale("notify_title"),
+                            description = locale("no_input"),
+                            duration = Config.NotifyDuration,
+                            position = Config.NotifyPosition,
+                            type = 'error',
+                        })
+                    else
+                        local lastname = input[1]
+                        TriggerServerEvent('DFNZ_NAME_CHANGE:change_lastname', lastname)
+                    end
+                end
             },
         }
     })
-
-    lib.showContext('name_change_menu')
-
-end)
-
-RegisterNetEvent('DFNZ_NAME_CHANGE:firstname_input', function()
-    local input = lib.inputDialog(Config.Text["firstname_change"], {
-        {type = 'input', label = Config.Text["enter_firstname"], placeholder = Config.Text["firstname_placeholder"], icon = 'user', required = true}
-    })
-    
-    local firstname = input[1]
-
-    if input == nil then
-        return nil
-    else
-        return TriggerServerEvent('DFNZ_NAME_CHANGE:change_firstname', firstname)
-    end
-end)
-
-RegisterNetEvent('DFNZ_NAME_CHANGE:lastname_input', function()
-    local input = lib.inputDialog(Config.Text["lastname_change"], {
-        {type = 'input', label = Config.Text["enter_lastname"], placeholder = Config.Text["lastname_placeholder"], icon = 'user', required = true}
-    })
-    
-    local lastname = input[1]
-
-    if input == nil then
-        return nil
-    else
-        return TriggerServerEvent('DFNZ_NAME_CHANGE:change_lastname', lastname)
-    end
-end)
-
-CreateThread(function()
-    if Config.showBlip == true then
-
-        blip = AddBlipForCoord(pos.x, pos.y, pos.z)
-        SetBlipDisplay(blip, 4)
-        SetBlipSprite(blip, 409)
-        SetBlipColour(blip, 44)
-        SetBlipScale(blip, 1.0)
-        SetBlipAsShortRange(blip, true)
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentString(Config.Text["blipname"])
-        EndTextCommandSetBlipName(blip)
-        
-    end   
 end)
